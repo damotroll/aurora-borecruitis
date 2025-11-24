@@ -55,7 +55,7 @@ function loadInitialState(): RecruitmentBuilderState {
           tabs: migratedTabs,
           activeTabId: 'tab-profiles-migrated',
           activeModule: parsed.activeModule || 'profiles',
-          darkMode: parsed.darkMode || false,
+          darkMode: parsed.darkMode ?? true,
           libraryFilter: parsed.libraryFilter || {}
         };
       }

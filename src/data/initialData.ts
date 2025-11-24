@@ -189,6 +189,6 @@ export const INITIAL_STATE: RecruitmentBuilderState = {
   tabs: DEFAULT_TABS,
   activeTabId: 'tab-profiles-default',
   activeModule: 'profiles',
-  darkMode: false,
+  darkMode: true,
   libraryFilter: {}
 };
