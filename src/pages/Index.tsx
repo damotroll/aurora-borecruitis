@@ -10,7 +10,7 @@ import JobAdsModule from '@/components/modules/JobAdsModule';
 import CaseStudiesModule from '@/components/modules/CaseStudiesModule';
 import LibraryModule from '@/components/modules/LibraryModule';
 
-const STORAGE_KEY = 'aurora-borecruitis-state';
+const STORAGE_KEY = 'aurora-boreacrutis-state';
 
 function loadInitialState(): RecruitmentBuilderState {
   try {
@@ -174,7 +174,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Aurora Borecruitis
+                Aurora Boreacrutis
               </h1>
 
               <Tabs
