@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { parseMarkdown, extractSeniorityLevel, extractDomain } from '@/utils/markdownParser';
 import { profileToMarkdown, downloadFile, toSafeFilename } from '@/utils/exportUtils';
 import { useRef, useState } from 'react';
+import NewProfileDialog from '@/components/dialogs/NewProfileDialog';
 
 interface ProfilesModuleProps {
   state: RecruitmentBuilderState;
@@ -18,6 +19,7 @@ interface ProfilesModuleProps {
 const ProfilesModule = ({ state, dispatch, activeTab, moduleState }: ProfilesModuleProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
+  const [isNewProfileDialogOpen, setIsNewProfileDialogOpen] = useState(false);
 
   const profiles = moduleState.profiles;
 
@@ -101,7 +103,11 @@ const ProfilesModule = ({ state, dispatch, activeTab, moduleState }: ProfilesMod
           <h2 className="text-xl font-semibold mb-6">Builder Tools</h2>
 
           <div className="space-y-3">
-            <Button className="w-full justify-start rounded-full" variant="default">
+            <Button
+              className="w-full justify-start rounded-full"
+              variant="default"
+              onClick={() => setIsNewProfileDialogOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               New Candidate Profile
             </Button>
@@ -158,7 +164,11 @@ const ProfilesModule = ({ state, dispatch, activeTab, moduleState }: ProfilesMod
               Create a new profile or import from a markdown file to get started.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button variant="default" className="rounded-full">
+              <Button
+                variant="default"
+                className="rounded-full"
+                onClick={() => setIsNewProfileDialogOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 New Profile
               </Button>
@@ -265,6 +275,14 @@ const ProfilesModule = ({ state, dispatch, activeTab, moduleState }: ProfilesMod
           ))
         )}
       </div>
+
+      {/* Dialogs */}
+      <NewProfileDialog
+        isOpen={isNewProfileDialogOpen}
+        onClose={() => setIsNewProfileDialogOpen(false)}
+        dispatch={dispatch}
+        tabId={activeTab.id}
+      />
     </div>
   );
 };

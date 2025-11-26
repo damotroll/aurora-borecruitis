@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { parseMarkdown, extractDomain } from '@/utils/markdownParser';
 import { jobAdToMarkdown, downloadFile, toSafeFilename } from '@/utils/exportUtils';
 import { useRef, useState } from 'react';
+import NewJobAdDialog from '@/components/dialogs/NewJobAdDialog';
+import NewContentBlockDialog from '@/components/dialogs/NewContentBlockDialog';
 
 interface JobAdsModuleProps {
   state: RecruitmentBuilderState;
@@ -18,8 +20,17 @@ interface JobAdsModuleProps {
 const JobAdsModule = ({ state, dispatch, activeTab, moduleState }: JobAdsModuleProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedJobAds, setExpandedJobAds] = useState<Set<string>>(new Set());
+  const [isNewJobAdDialogOpen, setIsNewJobAdDialogOpen] = useState(false);
+  const [isNewBlockDialogOpen, setIsNewBlockDialogOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState('');
 
   const jobAds = moduleState.jobAds;
+
+  // Filter content blocks for sidebar
+  const filteredBlocks = state.contentBlocks.filter(block => {
+    if (!typeFilter) return true;
+    return block.type === typeFilter;
+  });
 
   const handleImportMarkdown = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -99,16 +110,20 @@ const JobAdsModule = ({ state, dispatch, activeTab, moduleState }: JobAdsModuleP
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Filter by Type</label>
-              <select className="w-full rounded-full px-4 py-2 bg-secondary/50 border border-border/50">
-                <option>All Types</option>
-                <option>Benefits</option>
-                <option>Requirements</option>
-                <option>Skills</option>
+              <select
+                className="w-full rounded-full px-4 py-2 bg-secondary/50 border border-border/50"
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+              >
+                <option value="">All Types</option>
+                <option value="benefit">Benefits</option>
+                <option value="requirement">Requirements</option>
+                <option value="skill">Skills</option>
               </select>
             </div>
 
             <div className="pt-4 space-y-3">
-              {state.contentBlocks.slice(0, 5).map((block) => (
+              {filteredBlocks.slice(0, 5).map((block) => (
                 <Card
                   key={block.id}
                   className="glass-panel rounded-2xl p-4 cursor-move hover:shadow-md transition-all"
@@ -144,7 +159,11 @@ const JobAdsModule = ({ state, dispatch, activeTab, moduleState }: JobAdsModuleP
               Import .md File
             </Button>
             
-            <Button className="w-full rounded-full" variant="outline">
+            <Button
+              className="w-full rounded-full"
+              variant="outline"
+              onClick={() => setIsNewBlockDialogOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               New Block
             </Button>
@@ -184,7 +203,11 @@ const JobAdsModule = ({ state, dispatch, activeTab, moduleState }: JobAdsModuleP
               Create a new job ad or import from a markdown file to get started.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button variant="default" className="rounded-full">
+              <Button
+                variant="default"
+                className="rounded-full"
+                onClick={() => setIsNewJobAdDialogOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 New Job Ad
               </Button>
@@ -291,6 +314,20 @@ const JobAdsModule = ({ state, dispatch, activeTab, moduleState }: JobAdsModuleP
           ))
         )}
       </div>
+
+      {/* Dialogs */}
+      <NewJobAdDialog
+        isOpen={isNewJobAdDialogOpen}
+        onClose={() => setIsNewJobAdDialogOpen(false)}
+        dispatch={dispatch}
+        tabId={activeTab.id}
+      />
+
+      <NewContentBlockDialog
+        isOpen={isNewBlockDialogOpen}
+        onClose={() => setIsNewBlockDialogOpen(false)}
+        dispatch={dispatch}
+      />
     </div>
   );
 };

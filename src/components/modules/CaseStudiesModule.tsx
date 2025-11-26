@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { parseMarkdown, extractSeniorityLevel, extractDomain } from '@/utils/markdownParser';
 import { caseStudyToMarkdown, downloadFile, toSafeFilename } from '@/utils/exportUtils';
 import { useRef, useState } from 'react';
+import NewCaseStudyDialog from '@/components/dialogs/NewCaseStudyDialog';
+import NewContentBlockDialog from '@/components/dialogs/NewContentBlockDialog';
 
 interface CaseStudiesModuleProps {
   state: RecruitmentBuilderState;
@@ -18,8 +20,20 @@ interface CaseStudiesModuleProps {
 const CaseStudiesModule = ({ state, dispatch, activeTab, moduleState }: CaseStudiesModuleProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedCaseStudies, setExpandedCaseStudies] = useState<Set<string>>(new Set());
+  const [isNewCaseStudyDialogOpen, setIsNewCaseStudyDialogOpen] = useState(false);
+  const [isNewQuestionDialogOpen, setIsNewQuestionDialogOpen] = useState(false);
+  const [questionFilter, setQuestionFilter] = useState('');
 
   const caseStudies = moduleState.caseStudies;
+
+  // Filter content blocks for sidebar (questions and evaluation criteria)
+  const filteredBlocks = state.contentBlocks.filter(block => {
+    // Only show questions and evaluation criteria
+    if (block.type !== 'question' && block.type !== 'evaluation_criteria') return false;
+    if (!questionFilter) return true;
+    // Filter by category or type if a filter is selected
+    return block.category === questionFilter || block.type === questionFilter;
+  });
 
   const handleImportMarkdown = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -134,17 +148,20 @@ const CaseStudiesModule = ({ state, dispatch, activeTab, moduleState }: CaseStud
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Filter</label>
-              <select className="w-full rounded-full px-4 py-2 bg-secondary/50 border border-border/50">
-                <option>All Questions</option>
-                <option>Technical</option>
-                <option>Strategic</option>
-                <option>Framework</option>
+              <select
+                className="w-full rounded-full px-4 py-2 bg-secondary/50 border border-border/50"
+                value={questionFilter}
+                onChange={(e) => setQuestionFilter(e.target.value)}
+              >
+                <option value="">All Questions</option>
+                <option value="technical">Technical</option>
+                <option value="interview">Interview</option>
+                <option value="scoring">Scoring</option>
               </select>
             </div>
 
             <div className="pt-4 space-y-3">
-              {state.contentBlocks
-                .filter(b => b.type === 'question' || b.type === 'evaluation_criteria')
+              {filteredBlocks
                 .slice(0, 3)
                 .map((block) => (
                   <Card
@@ -178,7 +195,11 @@ const CaseStudiesModule = ({ state, dispatch, activeTab, moduleState }: CaseStud
               Import .md File
             </Button>
             
-            <Button className="w-full rounded-full" variant="outline">
+            <Button
+              className="w-full rounded-full"
+              variant="outline"
+              onClick={() => setIsNewQuestionDialogOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               New Question
             </Button>
@@ -218,7 +239,11 @@ const CaseStudiesModule = ({ state, dispatch, activeTab, moduleState }: CaseStud
               Create a new case study or import from a markdown file to get started.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button variant="default" className="rounded-full">
+              <Button
+                variant="default"
+                className="rounded-full"
+                onClick={() => setIsNewCaseStudyDialogOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 New Case Study
               </Button>
@@ -345,6 +370,21 @@ const CaseStudiesModule = ({ state, dispatch, activeTab, moduleState }: CaseStud
           ))
         )}
       </div>
+
+      {/* Dialogs */}
+      <NewCaseStudyDialog
+        isOpen={isNewCaseStudyDialogOpen}
+        onClose={() => setIsNewCaseStudyDialogOpen(false)}
+        dispatch={dispatch}
+        tabId={activeTab.id}
+      />
+
+      <NewContentBlockDialog
+        isOpen={isNewQuestionDialogOpen}
+        onClose={() => setIsNewQuestionDialogOpen(false)}
+        dispatch={dispatch}
+        defaultType="question"
+      />
     </div>
   );
 };
